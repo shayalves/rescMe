@@ -97,6 +97,11 @@ return [
 
     'cipher' => 'AES-256-CBC',
 
+    // Default session expiration for personal access tokens.
+    // Value can be set via .env (SESSION_DEFAULT_EXPIRATION) and should be a string like "3M" for three months.
+    // The token expiration logic will parse this value and apply it when creating tokens.
+    'session_default_expiration' => env('SESSION_DEFAULT_EXPIRATION', '3M'),
+
     'key' => env('APP_KEY'),
 
     'previous_keys' => [

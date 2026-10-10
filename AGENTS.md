@@ -44,4 +44,11 @@ php artisan boost:install
 ```
 
 Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
+## Migration Timestamp Convention
+
+When creating new migrations with `php artisan make:migration`, include a timestamp in the migration filename so that it is always sorted after the most recent migration. The default Laravel behavior already prefixes migration files with a UTC timestamp (e.g., `2026_10_09_123456_create_posts_table.php`). If you create migrations manually or via scripts, ensure the timestamp follows this format and increments correctly.
+
+## Default Language for Generated Code
+
+When generating code through Artisan commands, scaffolding packages, or any automated tool, use English as the default language for both the code and its comments. This ensures consistency across the codebase and avoids language‑specific ambiguities that can arise during collaboration or version control.
 </laravel-boost-guidelines>

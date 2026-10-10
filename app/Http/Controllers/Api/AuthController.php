@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -50,7 +51,30 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $token = $user->createToken('android-app')->plainTextToken;
+        // Determine token expiration based on configurable default (e.g., "3M" for three months).
+        // Retrieve the default expiration setting (e.g., "3M" for three months).
+        $defaultExpiration = config('app.session_default_expiration');
+        // Fallback to three months if the format is invalid.
+        $expiresAt = Carbon::now();
+        if (preg_match('/^(\\d+)([MDY])$/', $defaultExpiration, $matches)) {
+            $value = (int) $matches[1];
+            $unit = $matches[2];
+            switch ($unit) {
+                case 'M':
+                    $expiresAt = Carbon::now()->addMonths($value);
+                    break;
+                case 'D':
+                    $expiresAt = Carbon::now()->addDays($value);
+                    break;
+                case 'Y':
+                    $expiresAt = Carbon::now()->addYears($value);
+                    break;
+            }
+        }
+
+        // Create token with default abilities and the calculated expiration.
+        $newToken = $user->createToken('android-app', ['*'], $expiresAt);
+        $token = $newToken->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful',
