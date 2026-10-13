@@ -22,10 +22,10 @@ class AuthControllerTest extends TestCase
         $response = $this->postJson('/user/register', $payload);
 
         $response->assertStatus(201)
-                  ->assertJsonStructure([
-                      'message',
-                      'user' => ['id', 'name', 'email'],
-                  ]);
+            ->assertJsonStructure([
+                'message',
+                'user' => ['id', 'name', 'email'],
+            ]);
 
         $this->assertDatabaseHas('users', [
             'email' => 'john@example.com',
@@ -42,16 +42,28 @@ class AuthControllerTest extends TestCase
         $payload = [
             'email' => $user->email,
             'password' => 'secret123',
+            'model' => 'Pixel 8',
+            'brand' => 'Google',
+            'kernel_version' => '5.15.0-android14',
         ];
 
         $response = $this->postJson('/user/login', $payload);
 
         $response->assertStatus(200)
-                  ->assertJsonStructure([
-                      'message',
-                      'token',
-                      'user' => ['id', 'name', 'email'],
-                  ]);
+            ->assertJsonStructure([
+                'message',
+                'token',
+                'user' => ['id', 'name', 'email'],
+            ]);
+
+        $this->assertDatabaseHas('devices', [
+            'user_id' => $user->id,
+            'model' => 'Pixel 8',
+            'brand' => 'Google',
+            'kernel_version' => '5.15.0-android14',
+            'public_ip' => '127.0.0.1',
+        ]);
+        $this->assertNotNull($user->tokens()->first()->device_id);
     }
 
     /** @test */
@@ -64,14 +76,17 @@ class AuthControllerTest extends TestCase
         $payload = [
             'email' => $user->email,
             'password' => 'wrongpass',
+            'model' => 'Pixel 8',
+            'brand' => 'Google',
+            'kernel_version' => '5.15.0-android14',
         ];
 
         $response = $this->postJson('/user/login', $payload);
 
         $response->assertStatus(401)
-                  ->assertJson([
-                      'message' => 'Invalid credentials',
-                  ]);
+            ->assertJson([
+                'message' => 'Invalid credentials',
+            ]);
     }
 
     /** @test */
@@ -81,13 +96,13 @@ class AuthControllerTest extends TestCase
         $token = $user->createToken('android-app')->plainTextToken;
 
         $response = $this->withHeaders([
-                'Authorization' => "Bearer {$token}",
-            ])->postJson('/user/logout');
+            'Authorization' => "Bearer {$token}",
+        ])->postJson('/user/logout');
 
         $response->assertStatus(200)
-                  ->assertJson([
-                      'message' => 'Logged out successfully',
-                  ]);
+            ->assertJson([
+                'message' => 'Logged out successfully',
+            ]);
     }
 
     /** @test */
@@ -97,12 +112,12 @@ class AuthControllerTest extends TestCase
         $token = $user->createToken('android-app')->plainTextToken;
 
         $response = $this->withHeaders([
-                'Authorization' => "Bearer {$token}",
-            ])->getJson('/user/me');
+            'Authorization' => "Bearer {$token}",
+        ])->getJson('/user/me');
 
         $response->assertStatus(200)
-                  ->assertJsonStructure([
-                      'user' => ['id', 'name', 'email'],
-                  ]);
+            ->assertJsonStructure([
+                'user' => ['id', 'name', 'email'],
+            ]);
     }
 }

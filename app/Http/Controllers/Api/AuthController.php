@@ -3,14 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
-use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -38,14 +37,9 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request): JsonResponse
     {
-        $request->validate([
-            'email' => 'required|string|email|max:255',
-            'password' => 'required|string',
-        ]);
-
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             return response()->json([
                 'message' => 'Invalid credentials',
             ], 401);
@@ -72,13 +66,28 @@ class AuthController extends Controller
             }
         }
 
-        // Create token with default abilities and the calculated expiration.
+        // Register (or refresh) the device before issuing the session token.
+        $device = $user->devices()->updateOrCreate(
+            [
+                'brand' => $request->validated('brand'),
+                'model' => $request->validated('model'),
+                'kernel_version' => $request->validated('kernel_version'),
+            ],
+            [
+                'public_ip' => $request->ip(),
+                'last_login_at' => Carbon::now(),
+            ],
+        );
+
+        // Create token with default abilities and the calculated expiration, linked to the device.
         $newToken = $user->createToken('android-app', ['*'], $expiresAt);
+        $newToken->accessToken->forceFill(['device_id' => $device->id])->save();
         $token = $newToken->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful',
             'token' => $token,
+            'device' => $device,
             'user' => $user,
         ]);
     }
