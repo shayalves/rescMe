@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ContactEmailController;
 use App\Http\Controllers\Api\ContactPhoneController;
+use App\Http\Controllers\Api\MessageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,4 +25,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('contacts', ContactController::class);
     Route::apiResource('contacts.emails', ContactEmailController::class)->only(['store', 'update', 'destroy'])->scoped();
     Route::apiResource('contacts.phones', ContactPhoneController::class)->only(['store', 'update', 'destroy'])->scoped();
+    Route::apiResource('messages', MessageController::class);
 });
