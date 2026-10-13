@@ -21,6 +21,7 @@ class MessageTest extends TestCase
         $this->getJson("/api/messages/{$message->id}")->assertUnauthorized();
         $this->patchJson("/api/messages/{$message->id}", [])->assertUnauthorized();
         $this->deleteJson("/api/messages/{$message->id}")->assertUnauthorized();
+        $this->postJson("/api/messages/{$message->id}/cancel")->assertUnauthorized();
     }
 
     public function test_user_can_list_only_their_messages(): void
@@ -94,21 +95,40 @@ class MessageTest extends TestCase
         ]);
     }
 
-    public function test_user_cannot_access_another_users_message(): void
+    public function test_user_can_cancel_their_message(): void
     {
         $user = User::factory()->create();
-        $otherUser = User::factory()->create();
-        $message = Message::factory()->create(['user_id' => $otherUser->id]);
+        $message = Message::factory()->for($user)->create();
         Sanctum::actingAs($user);
 
-        $this->getJson("/api/messages/{$message->id}")->assertNotFound();
-        $this->patchJson("/api/messages/{$message->id}", ['title' => 'Changed'])->assertNotFound();
-        $this->deleteJson("/api/messages/{$message->id}")->assertNotFound();
+        $response = $this->postJson("/api/messages/{$message->id}/cancel");
 
+        $response->assertOk()
+            ->assertJsonPath('data.id', $message->id)
+            ->assertJsonPath('data.status', Message::STATUS_CANCELED);
+        $this->assertDatabaseHas('messages', [
+            'id' => $message->id,
+            'status' => Message::STATUS_CANCELED,
+        ]);
+        $this->assertNotNull($response->json('data.canceled_at'));
+        $this->assertNotNull($message->fresh()->canceled_at);
+    }
+
+    public function test_user_cannot_edit_cancelled_message(): void
+    {
+        $user = User::factory()->create();
+        $message = Message::factory()->for($user)->create(['status' => Message::STATUS_CANCELED]);
+        Sanctum::actingAs($user);
+
+        $response = $this->patchJson("/api/messages/{$message->id}", [
+            'title' => 'Should not change',
+        ]);
+
+        $response->assertForbidden();
         $this->assertDatabaseHas('messages', [
             'id' => $message->id,
             'title' => $message->title,
-            'deleted_at' => null,
+            'status' => Message::STATUS_CANCELED,
         ]);
     }
 

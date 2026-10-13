@@ -46,21 +46,13 @@ class Message extends Model
         return $this->belongsToMany(Contact::class, 'messages_contacts')->withTimestamps();
     }
 
-    /**
-     * Message status constants.
-     */
-    public const STATUS_DRAFT = 0;
-
-    public const STATUS_PUBLISHED = 1;
-
-    public const STATUS_CANCELLED = 2;
-
-    public const STATUS_EXPIRED = 3;
-
-    // Added status constants as requested
+    // Message status constants.
     public const STATUS_CANCELED = 0;
+
     public const STATUS_ACTIVE = 1;
+
     public const STATUS_SENDING = 2;
+
     public const STATUS_SENT = 3;
 
     // Mapping of status values to human‑readable labels

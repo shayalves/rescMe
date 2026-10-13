@@ -57,7 +57,25 @@ class MessageController extends Controller
     public function update(UpdateMessageRequest $request, Message $message): MessageResource
     {
         $message = $request->user()->messages()->findOrFail($message->getKey());
+        // Only active messages (status 1) can be edited
+        if ($message->status !== Message::STATUS_ACTIVE) {
+            abort(403, 'Only active messages can be edited.');
+        }
         $message->update($request->validated());
+
+        return new MessageResource($message->load('contacts'));
+    }
+
+    /**
+     * Cancel the specified message.
+     */
+    public function cancel(Request $request, Message $message): MessageResource
+    {
+        $message = $request->user()->messages()->findOrFail($message->getKey());
+        $message->update([
+            'status' => Message::STATUS_CANCELED,
+            'canceled_at' => now(),
+        ]);
 
         return new MessageResource($message->load('contacts'));
     }

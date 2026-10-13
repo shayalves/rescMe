@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('contacts', ContactController::class);
     Route::apiResource('contacts.emails', ContactEmailController::class)->only(['store', 'update', 'destroy'])->scoped();
     Route::apiResource('contacts.phones', ContactPhoneController::class)->only(['store', 'update', 'destroy'])->scoped();
+    Route::post('messages/{message}/cancel', [MessageController::class, 'cancel']);
     Route::apiResource('messages', MessageController::class);
     Route::post('device/locations', [DeviceLocationController::class, 'store']);
 });

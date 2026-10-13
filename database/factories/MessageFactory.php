@@ -22,7 +22,7 @@ class MessageFactory extends Factory
             'user_id' => User::factory(),
             'title' => fake()->sentence(),
             'content' => fake()->paragraph(),
-            'status' => Message::STATUS_PUBLISHED,
+            'status' => Message::STATUS_ACTIVE,
             'expires_at' => null,
             'canceled_at' => null,
         ];
