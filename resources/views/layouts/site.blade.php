@@ -10,7 +10,7 @@
     <header class="sticky top-0 z-50 bg-primary shadow">
         <nav class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-6 py-4">
             <a href="{{ route('home') }}" class="flex items-center">
-                <img src="{{ Vite::asset('resources/images/rescme-logo.png') }}" alt="RescMe" class="h-10 w-auto">
+                <img src="{{ Vite::asset('resources/images/rescme-logo-white.svg') }}" alt="RescMe" class="h-10 w-auto">
             </a>
             <ul class="flex flex-wrap items-center gap-6 text-sm font-medium text-menu-text">
                 <li><a href="{{ route('home') }}" class="hover:underline">Home</a></li>

@@ -56,4 +56,18 @@ class Message extends Model
     public const STATUS_CANCELLED = 2;
 
     public const STATUS_EXPIRED = 3;
+
+    // Added status constants as requested
+    public const STATUS_CANCELED = 0;
+    public const STATUS_ACTIVE = 1;
+    public const STATUS_SENDING = 2;
+    public const STATUS_SENT = 3;
+
+    // Mapping of status values to human‑readable labels
+    public const STATUS_LABELS = [
+        self::STATUS_CANCELED => 'canceled',
+        self::STATUS_ACTIVE => 'active',
+        self::STATUS_SENDING => 'sending',
+        self::STATUS_SENT => 'sent',
+    ];
 }

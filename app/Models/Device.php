@@ -41,4 +41,12 @@ class Device extends Model
     {
         return $this->hasMany(PersonalAccessToken::class);
     }
+
+    /**
+     * Get the locations reported by the device.
+     */
+    public function locations(): HasMany
+    {
+        return $this->hasMany(DeviceLocation::class);
+    }
 }
