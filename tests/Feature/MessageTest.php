@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Contact;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -143,5 +144,41 @@ class MessageTest extends TestCase
             ->assertJson(['message' => 'Message deleted successfully']);
 
         $this->assertSoftDeleted($message);
+    }
+
+    public function test_message_contacts_can_be_set_on_create_and_update(): void
+    {
+        $user = User::factory()->create();
+        $first = Contact::factory()->create(['user_id' => $user->id]);
+        $second = Contact::factory()->create(['user_id' => $user->id]);
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/messages', [
+            'title' => 'Help',
+            'content' => 'Need help',
+            'contact_ids' => [$first->id],
+        ])->assertCreated()->assertJsonCount(1, 'data.contacts');
+
+        $id = $response->json('data.id');
+
+        $this->patchJson("/api/messages/{$id}", ['contact_ids' => [$first->id, $second->id]])
+            ->assertOk()->assertJsonCount(2, 'data.contacts');
+        $this->patchJson("/api/messages/{$id}", ['title' => 'Renamed'])
+            ->assertOk()->assertJsonCount(2, 'data.contacts');
+        $this->patchJson("/api/messages/{$id}", ['contact_ids' => [$second->id]])
+            ->assertOk()->assertJsonCount(1, 'data.contacts');
+    }
+
+    public function test_message_rejects_contacts_of_other_users(): void
+    {
+        $user = User::factory()->create();
+        $foreign = Contact::factory()->create(['user_id' => User::factory()->create()->id]);
+        Sanctum::actingAs($user);
+
+        $this->postJson('/api/messages', [
+            'title' => 'Help',
+            'content' => 'Need help',
+            'contact_ids' => [$foreign->id],
+        ])->assertUnprocessable()->assertJsonValidationErrors('contact_ids.0');
     }
 }

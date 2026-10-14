@@ -32,7 +32,8 @@ class MessageController extends Controller
      */
     public function store(StoreMessageRequest $request): JsonResponse
     {
-        $message = $request->user()->messages()->create($request->validated());
+        $message = $request->user()->messages()->create($request->safe()->except('contact_ids'));
+        $message->contacts()->sync($request->validated('contact_ids', []));
 
         return (new MessageResource($message->load('contacts')))
             ->response()
@@ -61,7 +62,10 @@ class MessageController extends Controller
         if ($message->status !== Message::STATUS_ACTIVE) {
             abort(403, 'Only active messages can be edited.');
         }
-        $message->update($request->validated());
+        $message->update($request->safe()->except('contact_ids'));
+        if ($request->has('contact_ids')) {
+            $message->contacts()->sync($request->validated('contact_ids'));
+        }
 
         return new MessageResource($message->load('contacts'));
     }

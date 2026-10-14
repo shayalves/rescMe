@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreMessageRequest extends FormRequest
 {
@@ -28,6 +29,12 @@ class StoreMessageRequest extends FormRequest
             'status' => ['sometimes', 'integer', 'min:0'],
             'expires_at' => ['sometimes', 'nullable', 'date'],
             'canceled_at' => ['sometimes', 'nullable', 'date'],
+            'contact_ids' => ['sometimes', 'array'],
+            'contact_ids.*' => [
+                'integer',
+                'distinct',
+                Rule::exists('contacts', 'id')->where('user_id', $this->user()->id)->whereNull('deleted_at'),
+            ],
         ];
     }
 }

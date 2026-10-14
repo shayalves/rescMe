@@ -43,7 +43,9 @@ class Message extends Model
      */
     public function contacts(): BelongsToMany
     {
-        return $this->belongsToMany(Contact::class, 'messages_contacts')->withTimestamps();
+        return $this->belongsToMany(Contact::class, 'messages_contacts')
+            ->using(MessageContact::class)
+            ->withTimestamps();
     }
 
     // Message status constants.
