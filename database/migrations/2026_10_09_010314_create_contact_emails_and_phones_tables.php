@@ -34,4 +34,3 @@ class CreateContactEmailsAndPhonesTables extends Migration
         Schema::dropIfExists('contact_emails');
     }
 }
-?>

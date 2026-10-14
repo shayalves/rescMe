@@ -55,4 +55,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Device::class);
     }
+
+    /**
+     * Get the emergencies reported by the user.
+     */
+    public function emergencies(): HasMany
+    {
+        return $this->hasMany(Emergency::class);
+    }
 }

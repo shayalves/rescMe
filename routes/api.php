@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ContactEmailController;
 use App\Http\Controllers\Api\ContactPhoneController;
 use App\Http\Controllers\Api\DeviceLocationController;
+use App\Http\Controllers\Api\EmergencyController;
 use App\Http\Controllers\Api\MessageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -28,5 +29,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('contacts.phones', ContactPhoneController::class)->only(['store', 'update', 'destroy'])->scoped();
     Route::post('messages/{message}/cancel', [MessageController::class, 'cancel']);
     Route::apiResource('messages', MessageController::class);
+    Route::post('emergencies', [EmergencyController::class, 'store']);
     Route::post('device/locations', [DeviceLocationController::class, 'store']);
 });
